@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quick Build WP - 一键搭建 WordPress</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="page">
+    <header class="header">
+      <h1>Quick Build WP</h1>
+      <p class="subtitle">填写全部配置，一键完成宝塔安装、环境部署与 WordPress 建站</p>
+    </header>
+
+    <div class="alert alert-warning" id="page-alert">
+      <strong>安全提示：</strong>本工具需要您服务器的 root 权限，请仅在自有服务器上使用。SSH 密码仅在部署期间暂存，任务结束后自动清除。
+    </div>
+
+    <section class="card" id="form-section">
+      <h2 class="card-title">部署配置</h2>
+
+      <form id="deploy-form" novalidate>
+        <h3 class="section-title">服务器与宝塔</h3>
+        <p class="hint">请使用全新 Linux 服务器。安全组需放行：22、80、443、8888。</p>
+
+        <div class="field">
+          <label for="ssh_host">SSH 地址 <span class="required">*</span></label>
+          <input type="text" id="ssh_host" name="ssh_host" placeholder="例如 47.96.xxx.xxx 或 server.example.com" required />
+        </div>
+        <div class="field">
+          <label for="ssh_password">SSH 密码 <span class="required">*</span></label>
+          <input type="password" id="ssh_password" name="ssh_password" placeholder="root 密码" required />
+        </div>
+        <button type="button" class="btn btn-secondary" id="btn-preflight">检测服务器环境</button>
+        <div class="preflight-result hidden" id="preflight-result"></div>
+
+        <details class="advanced">
+          <summary>高级设置</summary>
+          <p class="text-danger"><strong>不支持 Windows 系统</strong>，请使用 Linux 服务器（Ubuntu / Debian / CentOS 等）。</p>
+          <div class="field">
+            <label for="server_os">服务器系统类型</label>
+            <select id="server_os" name="server_os">
+              <option value="ubuntu">Ubuntu</option>
+              <option value="debian">Debian</option>
+              <option value="centos">CentOS / RHEL 系</option>
+              <option value="generic" selected>通用</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="ssh_port">SSH 端口</label>
+            <input type="number" id="ssh_port" name="ssh_port" value="22" min="1" max="65535" />
+          </div>
+          <div class="field">
+            <label for="ssh_user">SSH 用户名</label>
+            <input type="text" id="ssh_user" name="ssh_user" value="root" />
+          </div>
+          <div class="field">
+            <label for="bt_user">宝塔面板用户名</label>
+            <input type="text" id="bt_user" name="bt_user" placeholder="留空则自动生成" />
+          </div>
+          <div class="field">
+            <label for="bt_password">宝塔面板密码</label>
+            <input type="password" id="bt_password" name="bt_password" placeholder="留空则自动生成" />
+          </div>
+          <div class="field">
+            <label for="bt_port">宝塔面板端口</label>
+            <input type="number" id="bt_port" name="bt_port" value="8888" min="1024" max="65535" />
+          </div>
+        </details>
+
+        <h3 class="section-title">运行环境</h3>
+        <p class="hint">不确定版本时保持默认即可。</p>
+
+        <div class="field">
+          <label for="nginx_version">Web 服务器</label>
+          <select id="nginx_version" name="nginx_version">
+            <option value="1.20">Nginx 1.20</option>
+            <option value="1.22">Nginx 1.22</option>
+            <option value="1.24" selected>Nginx 1.24（推荐）</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="php_version">PHP 版本</label>
+          <select id="php_version" name="php_version">
+            <option value="7.4">PHP 7.4</option>
+            <option value="8.0">PHP 8.0</option>
+            <option value="8.2" selected>PHP 8.2（推荐）</option>
+            <option value="8.3">PHP 8.3</option>
+            <option value="8.4">PHP 8.4（部分服务器可能会安装失败）</option>
+            <option value="8.5">PHP 8.5（部分服务器可能会安装失败）</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="mysql_version">数据库</label>
+          <select id="mysql_version" name="mysql_version">
+            <option value="5.7">MySQL 5.7</option>
+            <option value="8.0" selected>MySQL 8.0（推荐）</option>
+          </select>
+        </div>
+
+        <div class="sites-header">
+          <h3 class="section-title">网站配置</h3>
+          <button type="button" class="btn btn-secondary btn-sm" id="btn-add-site">+ 添加网站</button>
+        </div>
+        <p class="hint field-hint sites-intro">可一次部署多个网站；每个网站可绑定多个域名或 IP（一行一个），例如根域名与 www，或直接使用服务器 IP。</p>
+        <div id="sites-container"></div>
+
+        <template id="site-card-template">
+          <div class="site-card card-nested">
+            <div class="site-card-head">
+              <span class="site-card-title">网站 <span class="site-index">1</span></span>
+              <button type="button" class="btn-link btn-remove-site" title="移除此网站">移除</button>
+            </div>
+            <div class="field">
+              <label>网站名称（可选）</label>
+              <input type="text" class="site-name" placeholder="留空则默认「示例博客」" />
+            </div>
+            <div class="field">
+              <label>绑定域名或 IP <span class="required">*</span></label>
+              <textarea class="site-domains" rows="3" placeholder="example.com&#10;www.example.com&#10;或 192.168.1.100" required></textarea>
+              <p class="hint field-hint">一行一个域名或 IP，第一个为主地址；使用域名时请确保已解析到服务器</p>
+            </div>
+            <div class="field">
+              <label>管理员账号（可选）</label>
+              <input type="text" class="wp-admin-user" placeholder="留空则默认 admin" pattern="[a-zA-Z0-9_\-]+" />
+            </div>
+            <div class="field">
+              <label>管理员密码（可选）</label>
+              <input type="password" class="wp-admin-password" placeholder="留空则自动生成" minlength="6" />
+            </div>
+            <div class="field">
+              <label>管理员邮箱（可选）</label>
+              <input type="email" class="wp-admin-email" placeholder="留空则自动生成" />
+            </div>
+            <div class="field">
+              <label>网站语言</label>
+              <select class="wp-locale">
+                <option value="zh_CN" selected>简体中文</option>
+                <option value="en_US">English</option>
+              </select>
+            </div>
+            <details class="advanced">
+              <summary>数据库高级设置（可选）</summary>
+              <p class="hint">留空则由程序自动生成数据库名称、用户名、密码和表前缀。</p>
+              <div class="field">
+                <label>数据库表前缀</label>
+                <input type="text" class="db-prefix" placeholder="留空则默认 wp_" pattern="[a-zA-Z0-9_]+" maxlength="20" />
+              </div>
+              <div class="field">
+                <label>数据库名称</label>
+                <input type="text" class="db-name" placeholder="例如 wp_mysite" pattern="[a-zA-Z0-9_]+" maxlength="64" />
+              </div>
+              <div class="field">
+                <label>数据库用户名</label>
+                <input type="text" class="db-user" placeholder="留空则与库名相同（最多 16 位）" pattern="[a-zA-Z0-9_]+" maxlength="16" />
+              </div>
+              <div class="field">
+                <label>数据库密码</label>
+                <input type="password" class="db-password" placeholder="留空则自动生成" minlength="6" maxlength="128" />
+              </div>
+            </details>
+          </div>
+        </template>
+
+        <div class="form-actions" id="start-actions">
+          <button type="submit" class="btn btn-primary btn-lg" id="btn-start">一键开始搭建</button>
+          <p class="hint center">点击后将检测服务器环境，确认参数后开始部署</p>
+        </div>
+      </form>
+    </section>
+
+    <section class="card hidden" id="progress-section">
+      <h2 class="card-title" id="progress-title">确认部署</h2>
+
+      <div class="check-flow" id="check-flow"></div>
+
+      <div id="confirm-panel">
+        <h3 class="section-title">部署参数确认</h3>
+        <p class="hint">请核对以下配置，确认无误后点击「确认并开始部署」。</p>
+        <table class="confirm-table" id="confirm-table"></table>
+        <div class="confirm-actions">
+          <button type="button" class="btn btn-secondary" id="btn-back-edit">返回修改</button>
+          <button type="button" class="btn btn-primary btn-lg" id="btn-confirm-start">确认并开始部署</button>
+        </div>
+      </div>
+
+      <div class="hidden" id="deploy-panel">
+        <p class="hint center" id="progress-hint">预计 20–40 分钟，请勿关闭页面</p>
+
+        <div class="steps steps-detailed" id="steps">
+          <div class="step" data-step="0">
+            <div class="step-icon"><span class="step-num">1</span></div>
+            <div class="step-label">安装宝塔</div>
+          </div>
+          <div class="step-line"></div>
+          <div class="step" data-step="1">
+            <div class="step-icon"><span class="step-num">2</span></div>
+            <div class="step-label">安装 Nginx</div>
+          </div>
+          <div class="step-line"></div>
+          <div class="step" data-step="2">
+            <div class="step-icon"><span class="step-num">3</span></div>
+            <div class="step-label">安装 PHP</div>
+          </div>
+          <div class="step-line"></div>
+          <div class="step" data-step="3">
+            <div class="step-icon"><span class="step-num">4</span></div>
+            <div class="step-label">安装 MySQL</div>
+          </div>
+          <div class="step-line"></div>
+          <div class="step" data-step="4">
+            <div class="step-icon"><span class="step-num">5</span></div>
+            <div class="step-label">安装 Redis</div>
+          </div>
+          <div class="step-line"></div>
+          <div class="step" data-step="5">
+            <div class="step-icon"><span class="step-num">6</span></div>
+            <div class="step-label">PHP 组件与扩展</div>
+          </div>
+          <div class="step-line"></div>
+          <div class="step" data-step="6">
+            <div class="step-icon"><span class="step-num">7</span></div>
+            <div class="step-label">配置优化</div>
+          </div>
+          <div class="step-line"></div>
+          <div class="step" data-step="7">
+            <div class="step-icon"><span class="step-num">8</span></div>
+            <div class="step-label">创建网站</div>
+          </div>
+          <div class="step-line"></div>
+          <div class="step" data-step="8">
+            <div class="step-icon"><span class="step-num">9</span></div>
+            <div class="step-label">安装ssl证书</div>
+          </div>
+        </div>
+        <p class="current-step" id="current-step-label"></p>
+        <p class="hint center">任务 ID：<span id="task-link" class="mono"></span>
+          <button type="button" class="btn-link" id="btn-copy-link">复制</button>
+        </p>
+
+        <div class="deploy-toolbar" id="deploy-toolbar">
+          <button type="button" class="btn btn-danger-outline" id="btn-cancel-deploy">终止任务</button>
+        </div>
+
+        <div id="log-section">
+          <h3 class="section-title">实时日志</h3>
+          <div class="log-viewer" id="log-viewer"></div>
+        </div>
+
+        <div class="hidden" id="result-success">
+          <div class="result-banner success">您的任务已完成！</div>
+          <div class="result-banner warning result-security-notice">
+            请及时修改您的 <strong>SSH 密码</strong>，以及<strong>宝塔面板</strong>和<strong>网站管理员</strong>的账号及密码。
+            请立即将下方信息保存到安全位置；关闭页面后将无法再次查看。
+          </div>
+          <p class="result-save-hint">请妥善记录以下全部信息，建议复制保存或截图留存。</p>
+
+          <div class="result-section">
+            <h4 class="result-section-title">宝塔面板</h4>
+            <table class="result-table" id="result-table-baota"></table>
+          </div>
+
+          <div class="result-section">
+            <h4 class="result-section-title">网站信息</h4>
+            <table class="result-table" id="result-table-site"></table>
+            <div class="result-banner warning hidden" id="result-password-notice"></div>
+          <div class="result-banner warning hidden" id="result-ssl-notice"></div>
+          </div>
+
+          <div class="result-actions result-actions-success">
+            <a href="#" class="btn btn-secondary" id="link-site" target="_blank" rel="noreferrer">打开网站</a>
+            <a href="#" class="btn btn-secondary" id="link-admin" target="_blank" rel="noreferrer">进入后台</a>
+            <button type="button" class="btn btn-primary" id="btn-saved-close">已保存，关闭页面</button>
+          </div>
+        </div>
+
+        <div class="hidden" id="result-failed">
+          <div class="result-banner error" id="error-message"></div>
+          <div class="result-banner warning hidden" id="partial-manual-hint"></div>
+          <div class="result-section hidden" id="partial-completed-section">
+            <h4 class="result-section-title">已完成步骤</h4>
+            <ul class="partial-completed-list" id="partial-completed-list"></ul>
+          </div>
+          <p class="result-save-hint hidden" id="partial-save-hint">
+            请保存以下信息，便于在宝塔面板或 SSH 中手动继续后续操作。
+          </p>
+          <div class="result-section hidden" id="partial-baota-section">
+            <h4 class="result-section-title">宝塔面板</h4>
+            <table class="result-table" id="partial-table-baota"></table>
+          </div>
+          <div class="result-section hidden" id="partial-env-section">
+            <h4 class="result-section-title">已安装环境</h4>
+            <table class="result-table" id="partial-table-env"></table>
+          </div>
+          <div class="result-section hidden" id="partial-db-section">
+            <h4 class="result-section-title">数据库（计划/已创建）</h4>
+            <table class="result-table" id="partial-table-db"></table>
+          </div>
+          <div class="result-section hidden" id="partial-site-section">
+            <h4 class="result-section-title">网站信息</h4>
+            <table class="result-table" id="partial-table-site"></table>
+          </div>
+          <div class="result-actions">
+            <button type="button" class="btn btn-primary" id="btn-retry">立即重试</button>
+            <button type="button" class="btn btn-danger-outline" id="btn-cancel-failed">终止任务</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="modal hidden" id="env-blocked-modal" role="dialog" aria-modal="true">
+    <div class="modal-backdrop" data-modal-close="env-blocked"></div>
+    <div class="modal-box modal-box-lg">
+      <h3>无法继续安装</h3>
+      <div id="env-blocked-body" class="env-modal-body"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-primary" data-modal-close="env-blocked">我知道了</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal hidden" id="env-warning-modal" role="dialog" aria-modal="true">
+    <div class="modal-backdrop" data-modal-close="env-warning"></div>
+    <div class="modal-box modal-box-lg">
+      <h3>检测到非全新环境</h3>
+      <p class="env-modal-lead">
+        当前服务器上已存在部分安装痕迹。<strong>强烈建议在全新服务器上安装</strong>，非全新环境继续安装可能引发冲突或失败。
+      </p>
+      <div id="env-warning-body" class="env-modal-body"></div>
+      <p class="env-modal-note">
+        若选择继续，系统将自动检测已安装组件并跳过，从<strong>尚未完成的步骤</strong>开始执行。
+      </p>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" data-modal-close="env-warning">返回修改</button>
+        <button type="button" class="btn btn-primary" id="btn-env-continue">继续安装</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal hidden" id="env-risk-modal" role="dialog" aria-modal="true">
+    <div class="modal-backdrop" data-modal-close="env-risk"></div>
+    <div class="modal-box modal-box-lg">
+      <h3>风险提醒</h3>
+      <p class="env-modal-lead text-danger">
+        继续安装可能会出错或影响现有服务。我们依然<strong>强烈建议您使用全新系统</strong>进行安装。
+      </p>
+      <ul class="env-risk-list">
+        <li>已安装的宝塔、Nginx、PHP、MySQL 等将尽量保留，不会重复安装</li>
+        <li>未完成的步骤将自动续装，但无法保证与现有环境完全兼容</li>
+        <li>若出现问题，可能需要您手动在宝塔面板中排查</li>
+      </ul>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" data-modal-close="env-risk">取消</button>
+        <button type="button" class="btn btn-danger-outline" id="btn-env-risk-confirm">我已了解风险，继续安装</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast hidden" id="toast"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

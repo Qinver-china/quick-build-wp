@@ -1,0 +1,15 @@
+node_modules/
+dist/
+__pycache__/
+*.pyc
+.env
+.venv/
+venv/
+*.egg-info/
+.DS_Store
+.idea/
+.vscode/
+.cursor/
+
+# 本地规划文档（可选公开，默认忽略）
+*.plan.md

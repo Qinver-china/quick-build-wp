@@ -1,0 +1,4 @@
+# 部署备用资源（体积较大，不纳入 Git；请运行 scripts/download_assets.sh 下载）
+*.zip
+*.phar
+!.gitkeep
