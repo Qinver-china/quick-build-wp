@@ -290,15 +290,43 @@ def _strip_ansi(text: str) -> str:
 
 
 def _build_configure_panel_credentials_script(username: str, password: str) -> str:
-    return f"""import os
+    """通过宝塔官方 tools.py CLI 设置密码，避免 import tools 命中错误模块。"""
+    return f"""import importlib.util
+import os
+import subprocess
+import sys
 {_PANEL_PYTHON_BOOTSTRAP}
-import tools
+panel_dir = {PANEL_DIR!r}
+password = {password!r}
+username = {username!r}
+py = sys.executable
 
-tools.panel({password!r})
-tools.set_panel_username({username!r})
-default_pl = os.path.join({PANEL_DIR!r}, "default.pl")
+proc = subprocess.run(
+    [py, "tools.py", "panel", password],
+    cwd=panel_dir,
+    capture_output=True,
+    text=True,
+)
+combined = (proc.stdout or "") + (proc.stderr or "")
+if proc.returncode != 0:
+    print(combined.strip(), file=sys.stderr)
+    sys.exit(proc.returncode or 1)
+
+tools_path = os.path.join(panel_dir, "tools.py")
+spec = importlib.util.spec_from_file_location("panel_tools", tools_path)
+if spec is None or spec.loader is None:
+    print("无法加载 panel tools.py", file=sys.stderr)
+    sys.exit(1)
+panel_tools = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(panel_tools)
+if not hasattr(panel_tools, "set_panel_username"):
+    print("panel tools.py 缺少 set_panel_username", file=sys.stderr)
+    sys.exit(1)
+panel_tools.set_panel_username(username)
+
+default_pl = os.path.join(panel_dir, "default.pl")
 with open(default_pl, "w", encoding="utf-8") as fh:
-    fh.write({password!r})
+    fh.write(password)
 os.chmod(default_pl, 0o600)
 print("PANEL_CREDS_OK")
 """
