@@ -108,6 +108,12 @@ def _apply_schema(conn) -> None:
             "php_version_requested VARCHAR(16)"
         )
     )
+    conn.execute(
+        text(
+            "ALTER TABLE deploy_tasks ADD COLUMN IF NOT EXISTS "
+            "mysql_version_requested VARCHAR(16)"
+        )
+    )
     # deployphase 枚举与 SQLAlchemy 写入的成员名（如 STEP2_PHP）保持一致
     for phase in (
         "STEP2_NGINX",

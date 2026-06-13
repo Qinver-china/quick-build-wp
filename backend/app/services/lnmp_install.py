@@ -14,6 +14,13 @@ from app.services.php_compat import (
     php_install_fallback_message,
     resolve_php_version_for_os,
 )
+from app.services.mysql_compat import (
+    MYSQL_FALLBACK_VERSION,
+    can_auto_fallback_mysql,
+    mysql_install_fallback_message,
+    resolve_mysql_version_for_ram,
+)
+from app.services.server_memory import detect_ram_mb
 from app.services.remote_probe import (
     component_ready,
     is_component_install_running,
@@ -132,6 +139,9 @@ def _install_log_failure(ssh: SSHClient, log_file: str, secrets: list[str]) -> s
         "Install failed",
         "ERROR:",
         "error:",
+        "至少需要",
+        "空闲内存",
+        "释放内存",
     )
     for line in out.splitlines():
         text = line.strip()
@@ -210,6 +220,84 @@ def _maybe_downgrade_php_for_os(
             warn or "当前系统不支持所选 PHP 版本",
             log_phase,
         )
+
+
+def _apply_mysql_fallback(
+    task: DeployTask,
+    db: Session,
+    from_version: str,
+    to_version: str,
+    reason: str,
+    log_phase: str,
+) -> None:
+    if not task.mysql_version_requested:
+        task.mysql_version_requested = from_version
+    task.mysql_version = to_version
+    db.commit()
+    db.refresh(task)
+    publish_log(
+        task.id,
+        log_phase,
+        mysql_install_fallback_message(from_version, to_version, reason),
+        db,
+    )
+
+
+def _maybe_downgrade_mysql_for_ram(
+    task: DeployTask,
+    ssh: SSHClient,
+    secrets: list[str],
+    db: Session,
+    log_phase: str,
+) -> None:
+    """策略 1：step3_mysql 开始前按总内存预检降级。"""
+    ram_mb = detect_ram_mb(ssh, secrets)
+    effective, warn = resolve_mysql_version_for_ram(task.mysql_version, ram_mb)
+    if effective == task.mysql_version or not warn:
+        return
+    if not task.mysql_version_requested:
+        task.mysql_version_requested = task.mysql_version
+    task.mysql_version = effective
+    db.commit()
+    db.refresh(task)
+    publish_log(task.id, log_phase, warn, db)
+
+
+def _install_mysql_with_fallback(
+    task: DeployTask,
+    ssh: SSHClient,
+    secrets: list[str],
+    db: Session,
+    log_phase: str,
+    step_status: StepStatus | None,
+) -> None:
+    """策略 2：MySQL 8.0 安装失败时降级到 5.7 再试一次。"""
+    requested = task.mysql_version
+    try:
+        _install_baota_component(
+            task, ssh, secrets, db, "mysql", task.mysql_version, log_phase, step_status
+        )
+    except RuntimeError as exc:
+        if (
+            can_auto_fallback_mysql(requested)
+            and task.mysql_version == requested
+            and MYSQL_FALLBACK_VERSION != requested
+        ):
+            _apply_mysql_fallback(
+                task, db, requested, MYSQL_FALLBACK_VERSION, str(exc), log_phase
+            )
+            _install_baota_component(
+                task,
+                ssh,
+                secrets,
+                db,
+                "mysql",
+                MYSQL_FALLBACK_VERSION,
+                log_phase,
+                None,
+            )
+        else:
+            raise
 
 
 def _install_php_with_fallback(
@@ -475,8 +563,9 @@ def install_mysql(
 
     with _ssh(task, password, log_phase, db) as ssh:
         _ensure_panel_install_lib(task, ssh, secrets, db, log_phase)
-        _install_baota_component(
-            task, ssh, secrets, db, "mysql", task.mysql_version, log_phase, mysql_status
+        _maybe_downgrade_mysql_for_ram(task, ssh, secrets, db, log_phase)
+        _install_mysql_with_fallback(
+            task, ssh, secrets, db, log_phase, mysql_status
         )
         ssh.run(
             "/etc/init.d/mysqld start 2>/dev/null || /etc/init.d/mysql start 2>/dev/null; true",

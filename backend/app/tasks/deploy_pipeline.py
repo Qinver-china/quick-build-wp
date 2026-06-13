@@ -208,6 +208,14 @@ def run_deploy_pipeline(self, task_id: str, recovery: bool = False) -> None:
         lnmp_info = {**lnmp_info, **mysql_info}
         progress.lnmp_info = lnmp_info
         db.refresh(task)
+        if task.mysql_version_requested and task.mysql_version_requested != task.mysql_version:
+            publish_log(
+                task.id,
+                "system",
+                f"MySQL 版本：用户选择 {task.mysql_version_requested}，"
+                f"已自动降级为 MySQL {task.mysql_version}",
+                db,
+            )
         refresh_deploy_lock(task_id, lock_owner)
         _abort_if_stopped(db, task_id)
 

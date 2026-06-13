@@ -89,6 +89,7 @@ class DeployTask(Base):
     php_version: Mapped[str] = mapped_column(String(16), default="8.2")
     php_version_requested: Mapped[str | None] = mapped_column(String(16), nullable=True)
     mysql_version: Mapped[str] = mapped_column(String(16), default="8.0")
+    mysql_version_requested: Mapped[str | None] = mapped_column(String(16), nullable=True)
 
     # WordPress config
     site_name: Mapped[str] = mapped_column(String(255))
