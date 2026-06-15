@@ -30,11 +30,11 @@ class StatsListItem(BaseModel):
     task_id: str
     client_ip: str | None
     sites: list[StatsSiteItem]
-    status: Literal["success", "failed", "cancelled"]
+    status: Literal["running", "success", "failed", "cancelled"]
     failed_phase: str | None
     error_summary: str | None
     created_at: datetime
-    finished_at: datetime
+    finished_at: datetime | None
 
 
 class StatsListResponse(BaseModel):

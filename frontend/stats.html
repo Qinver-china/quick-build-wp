@@ -67,6 +67,7 @@
           <label for="stats-status-filter">状态</label>
           <select id="stats-status-filter">
             <option value="">全部</option>
+            <option value="running">正在部署中</option>
             <option value="success">成功</option>
             <option value="failed">失败</option>
             <option value="cancelled">已取消</option>
@@ -78,7 +79,8 @@
         <table class="stats-table">
           <thead>
             <tr>
-              <th>完成时间</th>
+              <th>创建时间</th>
+              <th>结束时间</th>
               <th>IP</th>
               <th>网站</th>
               <th>状态</th>
@@ -87,7 +89,7 @@
             </tr>
           </thead>
           <tbody id="stats-table-body">
-            <tr><td colspan="6" class="empty-cell">暂无数据</td></tr>
+            <tr><td colspan="7" class="empty-cell">暂无数据</td></tr>
           </tbody>
         </table>
       </div>

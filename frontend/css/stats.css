@@ -230,6 +230,11 @@ body {
   font-weight: 600;
 }
 
+.qbw-stats-app .status-running {
+  background: #e6f4ff;
+  color: #0958d9;
+}
+
 .qbw-stats-app .status-success {
   background: #f6ffed;
   color: #389e0d;

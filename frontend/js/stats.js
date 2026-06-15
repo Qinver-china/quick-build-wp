@@ -32,6 +32,7 @@
   }
 
   function statusLabel(status) {
+    if (status === 'running') return '正在部署中';
     if (status === 'success') return '成功';
     if (status === 'failed') return '失败';
     if (status === 'cancelled') return '已取消';
@@ -39,6 +40,7 @@
   }
 
   function statusClass(status) {
+    if (status === 'running') return 'status-running';
     if (status === 'success') return 'status-success';
     if (status === 'failed') return 'status-failed';
     if (status === 'cancelled') return 'status-cancelled';
@@ -154,12 +156,13 @@
     $body.empty();
 
     if (!items || !items.length) {
-      $body.append('<tr><td colspan="6" class="empty-cell">暂无数据</td></tr>');
+      $body.append('<tr><td colspan="7" class="empty-cell">暂无数据</td></tr>');
       return;
     }
 
     items.forEach(function (item) {
       var row = '<tr>'
+        + '<td>' + formatDate(item.created_at) + '</td>'
         + '<td>' + formatDate(item.finished_at) + '</td>'
         + '<td>' + esc(item.client_ip || '-') + '</td>'
         + '<td>' + renderSites(item.sites) + '</td>'

@@ -19,7 +19,7 @@ from app.schemas.deploy import (
 )
 from app.services.deploy_cancel import clear_deploy_cancelled, purge_deploy_task
 from app.services.deploy_lock import clear_deploy_lock, release_host_lock, release_stale_host_lock
-from app.services.deploy_stats import record_deploy_stat
+from app.services.deploy_stats import record_deploy_stat, restart_deploy_stat, start_deploy_stat
 from app.services.log_publisher import publish_log
 from app.services.preflight import run_preflight_with_timeout
 from app.tasks.deploy_pipeline import run_deploy_pipeline
@@ -153,6 +153,8 @@ def create_deploy(req: DeployCreateRequest, request: Request, db: Session = Depe
     db.commit()
     db.refresh(task)
 
+    start_deploy_stat(db, task)
+
     run_deploy_pipeline.apply_async(args=[task.id], task_id=task.id)
 
     return DeployCreateResponse(
@@ -196,6 +198,8 @@ def retry_deploy(token: str, db: Session = Depends(get_db)):
     task.error_message = None
     task.result = None
     db.commit()
+
+    restart_deploy_stat(db, task)
 
     publish_log(
         task.id,

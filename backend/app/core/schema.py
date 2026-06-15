@@ -149,6 +149,12 @@ def _apply_schema(conn) -> None:
         )
     conn.execute(
         text(
+            "CREATE INDEX IF NOT EXISTS ix_deploy_stats_created_at "
+            "ON deploy_stats (created_at)"
+        )
+    )
+    conn.execute(
+        text(
             "CREATE INDEX IF NOT EXISTS ix_deploy_stats_finished_at "
             "ON deploy_stats (finished_at)"
         )
@@ -164,4 +170,7 @@ def _apply_schema(conn) -> None:
             "CREATE INDEX IF NOT EXISTS ix_deploy_stats_client_ip "
             "ON deploy_stats (client_ip)"
         )
+    )
+    conn.execute(
+        text("ALTER TABLE deploy_stats ALTER COLUMN finished_at DROP NOT NULL")
     )

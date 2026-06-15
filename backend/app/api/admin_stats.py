@@ -67,7 +67,7 @@ def _build_period_summary(db: Session, since_utc: datetime) -> StatsPeriodSummar
                 case((DeployStat.status.in_(["failed", "cancelled"]), 1), else_=0)
             ).label("failed"),
         )
-        .filter(DeployStat.finished_at >= since_utc)
+        .filter(DeployStat.created_at >= since_utc)
         .one()
     )
     return StatsPeriodSummary(
@@ -107,7 +107,7 @@ def list_stats(
     offset = (page - 1) * page_size
 
     rows = (
-        query.order_by(DeployStat.finished_at.desc())
+        query.order_by(func.coalesce(DeployStat.finished_at, DeployStat.created_at).desc())
         .offset(offset)
         .limit(page_size)
         .all()

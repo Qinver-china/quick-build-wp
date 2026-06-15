@@ -10,6 +10,7 @@ from app.core.database import Base
 
 
 class DeployStatStatus(str, enum.Enum):
+    RUNNING = "running"
     SUCCESS = "success"
     FAILED = "failed"
     CANCELLED = "cancelled"
@@ -18,6 +19,7 @@ class DeployStatStatus(str, enum.Enum):
 class DeployStat(Base):
     __tablename__ = "deploy_stats"
     __table_args__ = (
+        Index("ix_deploy_stats_created_at", "created_at"),
         Index("ix_deploy_stats_finished_at", "finished_at"),
         Index("ix_deploy_stats_status", "status"),
         Index("ix_deploy_stats_client_ip", "client_ip"),
@@ -31,4 +33,4 @@ class DeployStat(Base):
     failed_phase: Mapped[str | None] = mapped_column(String(32), nullable=True)
     error_summary: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
-    finished_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
