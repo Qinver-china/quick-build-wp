@@ -85,8 +85,8 @@ class DeployTask(Base):
     bt_safe_path: Mapped[str] = mapped_column(String(64))
 
     # LNMP versions
-    nginx_version: Mapped[str] = mapped_column(String(16), default="1.24")
-    php_version: Mapped[str] = mapped_column(String(16), default="8.2")
+    nginx_version: Mapped[str] = mapped_column(String(16), default="1.30")
+    php_version: Mapped[str] = mapped_column(String(16), default="8.5")
     php_version_requested: Mapped[str | None] = mapped_column(String(16), nullable=True)
     mysql_version: Mapped[str] = mapped_column(String(16), default="8.0")
     mysql_version_requested: Mapped[str | None] = mapped_column(String(16), nullable=True)

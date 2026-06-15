@@ -20,24 +20,24 @@
     <section class="card" id="form-section">
       <h2 class="card-title">部署配置</h2>
 
-      <form id="deploy-form" novalidate>
+      <form id="deploy-form" novalidate autocomplete="off">
         <h3 class="section-title">服务器与宝塔</h3>
         <p class="hint">请使用全新 Linux 服务器。安全组需放行：22、80、443、8888。</p>
 
         <div class="field">
           <label for="ssh_host">SSH 地址 <span class="required">*</span></label>
-          <input type="text" id="ssh_host" name="ssh_host" placeholder="例如 47.96.xxx.xxx 或 server.example.com" required />
+          <input autocomplete="off" type="text" id="ssh_host" name="ssh_host" placeholder="例如 47.96.xxx.xxx 或 server.example.com" required />
         </div>
         <div class="field">
           <label for="ssh_password">SSH 密码 <span class="required">*</span></label>
-          <input type="password" id="ssh_password" name="ssh_password" placeholder="root 密码" required />
+          <input autocomplete="new-password" type="password" id="ssh_password" name="ssh_password" placeholder="root 密码" required />
         </div>
         <button type="button" class="btn btn-secondary" id="btn-preflight">检测服务器环境</button>
         <div class="preflight-result hidden" id="preflight-result"></div>
 
         <details class="advanced">
           <summary>高级设置</summary>
-          <p class="text-danger"><strong>不支持 Windows 系统</strong>，请使用 Linux 服务器（Ubuntu / Debian / CentOS 等）。</p>
+          <p class="text-danger"><strong>不支持 Windows 系统</strong>，请使用 Linux 服务器（Ubuntu / Debian 等）。</p>
           <div class="field">
             <label for="server_os">服务器系统类型</label>
             <select id="server_os" name="server_os">
@@ -49,23 +49,23 @@
           </div>
           <div class="field">
             <label for="ssh_port">SSH 端口</label>
-            <input type="number" id="ssh_port" name="ssh_port" value="22" min="1" max="65535" />
+            <input autocomplete="off" type="number" id="ssh_port" name="ssh_port" value="22" min="1" max="65535" />
           </div>
           <div class="field">
             <label for="ssh_user">SSH 用户名</label>
-            <input type="text" id="ssh_user" name="ssh_user" value="root" />
+            <input autocomplete="off" type="text" id="ssh_user" name="ssh_user" value="root" />
           </div>
           <div class="field">
             <label for="bt_user">宝塔面板用户名</label>
-            <input type="text" id="bt_user" name="bt_user" placeholder="留空则自动生成" />
+            <input autocomplete="off" type="text" id="bt_user" name="bt_user" placeholder="留空则自动生成" />
           </div>
           <div class="field">
             <label for="bt_password">宝塔面板密码</label>
-            <input type="password" id="bt_password" name="bt_password" placeholder="留空则自动生成" />
+            <input autocomplete="new-password" type="password" id="bt_password" name="bt_password" placeholder="留空则自动生成" />
           </div>
           <div class="field">
             <label for="bt_port">宝塔面板端口</label>
-            <input type="number" id="bt_port" name="bt_port" value="8888" min="1024" max="65535" />
+            <input autocomplete="off" type="number" id="bt_port" name="bt_port" value="8888" min="1024" max="65535" />
           </div>
         </details>
 
@@ -77,7 +77,8 @@
           <select id="nginx_version" name="nginx_version">
             <option value="1.20">Nginx 1.20</option>
             <option value="1.22">Nginx 1.22</option>
-            <option value="1.24" selected>Nginx 1.24（推荐）</option>
+            <option value="1.24">Nginx 1.24</option>
+            <option value="1.30" selected>Nginx 1.30（推荐）</option>
           </select>
         </div>
         <div class="field">
@@ -85,17 +86,17 @@
           <select id="php_version" name="php_version">
             <option value="7.4">PHP 7.4</option>
             <option value="8.0">PHP 8.0</option>
-            <option value="8.2" selected>PHP 8.2（推荐）</option>
+            <option value="8.2">PHP 8.2</option>
             <option value="8.3">PHP 8.3</option>
-            <option value="8.4">PHP 8.4（部分服务器可能会安装失败）</option>
-            <option value="8.5">PHP 8.5（部分服务器可能会安装失败）</option>
+            <option value="8.4">PHP 8.4</option>
+            <option value="8.5" selected>PHP 8.5（推荐）</option>
           </select>
         </div>
         <div class="field">
           <label for="mysql_version">数据库</label>
           <select id="mysql_version" name="mysql_version">
             <option value="5.7">MySQL 5.7</option>
-            <option value="8.0" selected>MySQL 8.0（推荐）</option>
+            <option value="8.0" selected>MySQL 8.0（内存小于5G自动降级5.7）</option>
           </select>
         </div>
 
@@ -114,24 +115,24 @@
             </div>
             <div class="field">
               <label>网站名称（可选）</label>
-              <input type="text" class="site-name" placeholder="留空则默认「示例博客」" />
+              <input autocomplete="off" type="text" class="site-name" placeholder="留空则默认「示例博客」" />
             </div>
             <div class="field">
               <label>绑定域名或 IP <span class="required">*</span></label>
-              <textarea class="site-domains" rows="3" placeholder="example.com&#10;www.example.com&#10;或 192.168.1.100" required></textarea>
+              <textarea autocomplete="off" class="site-domains" rows="3" placeholder="example.com&#10;www.example.com&#10;或 192.168.1.100" required></textarea>
               <p class="hint field-hint">一行一个域名或 IP，第一个为主地址；使用域名时请确保已解析到服务器</p>
             </div>
             <div class="field">
               <label>管理员账号（可选）</label>
-              <input type="text" class="wp-admin-user" placeholder="留空则默认 admin" pattern="[a-zA-Z0-9_\-]+" />
+              <input autocomplete="off" type="text" class="wp-admin-user" placeholder="留空则默认 admin" pattern="[a-zA-Z0-9_\-]+" />
             </div>
             <div class="field">
               <label>管理员密码（可选）</label>
-              <input type="password" class="wp-admin-password" placeholder="留空则自动生成" minlength="6" />
+              <input autocomplete="new-password" type="password" class="wp-admin-password" placeholder="留空则自动生成" minlength="6" />
             </div>
             <div class="field">
               <label>管理员邮箱（可选）</label>
-              <input type="email" class="wp-admin-email" placeholder="留空则自动生成" />
+              <input autocomplete="off" type="email" class="wp-admin-email" placeholder="留空则自动生成" />
             </div>
             <div class="field">
               <label>网站语言</label>
@@ -145,19 +146,19 @@
               <p class="hint">留空则由程序自动生成数据库名称、用户名、密码和表前缀。</p>
               <div class="field">
                 <label>数据库表前缀</label>
-                <input type="text" class="db-prefix" placeholder="留空则默认 wp_" pattern="[a-zA-Z0-9_]+" maxlength="20" />
+                <input autocomplete="off" type="text" class="db-prefix" placeholder="留空则默认 wp_" pattern="[a-zA-Z0-9_]+" maxlength="20" />
               </div>
               <div class="field">
                 <label>数据库名称</label>
-                <input type="text" class="db-name" placeholder="例如 wp_mysite" pattern="[a-zA-Z0-9_]+" maxlength="64" />
+                <input autocomplete="off" type="text" class="db-name" placeholder="例如 wp_mysite" pattern="[a-zA-Z0-9_]+" maxlength="64" />
               </div>
               <div class="field">
                 <label>数据库用户名</label>
-                <input type="text" class="db-user" placeholder="留空则与库名相同（最多 16 位）" pattern="[a-zA-Z0-9_]+" maxlength="16" />
+                <input autocomplete="off" type="text" class="db-user" placeholder="留空则与库名相同（最多 16 位）" pattern="[a-zA-Z0-9_]+" maxlength="16" />
               </div>
               <div class="field">
                 <label>数据库密码</label>
-                <input type="password" class="db-password" placeholder="留空则自动生成" minlength="6" maxlength="128" />
+                <input autocomplete="new-password" type="password" class="db-password" placeholder="留空则自动生成" minlength="6" maxlength="128" />
               </div>
             </details>
           </div>
@@ -216,7 +217,7 @@
           <div class="step-line"></div>
           <div class="step" data-step="5">
             <div class="step-icon"><span class="step-num">6</span></div>
-            <div class="step-label">PHP 组件与扩展</div>
+            <div class="step-label">安装PHP扩展</div>
           </div>
           <div class="step-line"></div>
           <div class="step" data-step="6">

@@ -139,8 +139,8 @@ class DeployCreateRequest(BaseModel):
     bt_port: int = Field(default=8888, ge=1024, le=65535)
 
     # Step 2
-    nginx_version: str = Field(default="1.24")
-    php_version: str = Field(default="8.2")
+    nginx_version: str = Field(default="1.30")
+    php_version: str = Field(default="8.5")
     mysql_version: str = Field(default="8.0")
 
     # Step 3 — 多网站（推荐）或单站兼容字段

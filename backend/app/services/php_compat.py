@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-PHP_FALLBACK_VERSION = "8.2"
+PHP_FALLBACK_VERSION = "8.3"
 PHP_FALLBACK_SOURCE_VERSIONS = frozenset({"8.4", "8.5"})
 
 

@@ -18,7 +18,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="Quick Build WP",
     description="一键搭建 WordPress 环境",
-    version="0.1.1",
+    version="0.1.2",
     lifespan=lifespan,
 )
 
