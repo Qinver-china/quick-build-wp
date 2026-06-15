@@ -147,3 +147,21 @@ def _apply_schema(conn) -> None:
                 """
             )
         )
+    conn.execute(
+        text(
+            "CREATE INDEX IF NOT EXISTS ix_deploy_stats_finished_at "
+            "ON deploy_stats (finished_at)"
+        )
+    )
+    conn.execute(
+        text(
+            "CREATE INDEX IF NOT EXISTS ix_deploy_stats_status "
+            "ON deploy_stats (status)"
+        )
+    )
+    conn.execute(
+        text(
+            "CREATE INDEX IF NOT EXISTS ix_deploy_stats_client_ip "
+            "ON deploy_stats (client_ip)"
+        )
+    )

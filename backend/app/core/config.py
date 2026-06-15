@@ -8,6 +8,8 @@ class Settings(BaseSettings):
     cors_origins: str = "http://localhost:5173"
     task_expire_hours: int = 24
     rate_limit_per_hour: int = 5
+    admin_stats_token: str = ""
+    stats_timezone: str = "Asia/Shanghai"
 
     @property
     def cors_origin_list(self) -> list[str]:

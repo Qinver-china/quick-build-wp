@@ -4,6 +4,7 @@ from app.core.database import SessionLocal
 from app.core.redis_client import get_redis
 from app.models.deploy import DeployStatus, DeployTask
 from app.services.deploy_lock import clear_deploy_lock, release_host_lock
+from app.services.deploy_stats import record_deploy_stat
 from app.services.log_publisher import publish_log
 from app.tasks.deploy_pipeline import run_deploy_pipeline
 
@@ -41,6 +42,7 @@ def recover_incomplete_tasks() -> int:
                     task.status = DeployStatus.FAILED
                     task.error_message = "同一服务器存在更新的恢复任务，此任务已取消"
                     db.commit()
+                    record_deploy_stat(db, task)
                     release_host_lock(task.ssh_host, task.ssh_port, task.id)
                     publish_log(
                         task.id,

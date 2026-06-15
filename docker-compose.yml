@@ -30,6 +30,7 @@ services:
       DATABASE_URL: postgresql+psycopg://quickbuild:quickbuild@postgres:5432/quickbuild
       REDIS_URL: redis://redis:6379/0
       APP_SECRET: change-me-in-production-use-long-random-string
+      ADMIN_STATS_TOKEN: change-me-stats-token
       CORS_ORIGINS: http://localhost:5173,http://127.0.0.1:5173,https://aaa.zibll.com
     volumes:
       - ./backend:/app
@@ -47,6 +48,7 @@ services:
       DATABASE_URL: postgresql+psycopg://quickbuild:quickbuild@postgres:5432/quickbuild
       REDIS_URL: redis://redis:6379/0
       APP_SECRET: change-me-in-production-use-long-random-string
+      ADMIN_STATS_TOKEN: change-me-stats-token
     volumes:
       - ./backend:/app
       - ./scripts:/scripts
@@ -78,6 +80,7 @@ services:
       - "5173:80"
     volumes:
       - ./frontend/index.html:/usr/share/nginx/html/index.html:ro
+      - ./frontend/stats.html:/usr/share/nginx/html/stats.html:ro
       - ./frontend/css:/usr/share/nginx/html/css:ro
       - ./frontend/js:/usr/share/nginx/html/js:ro
     depends_on:

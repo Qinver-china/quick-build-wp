@@ -2,11 +2,12 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api import deploy, logs
+from app.api import admin_stats, deploy, logs
 from app.core.config import settings
 from app.core.schema import ensure_schema
 from app.models import deploy as deploy_models  # noqa: F401
 from app.models import log as log_models  # noqa: F401
+from app.models import stats as stats_models  # noqa: F401
 
 
 @asynccontextmanager
@@ -32,6 +33,7 @@ app.add_middleware(
 
 app.include_router(deploy.router)
 app.include_router(logs.router)
+app.include_router(admin_stats.router)
 
 
 @app.get("/api/health")

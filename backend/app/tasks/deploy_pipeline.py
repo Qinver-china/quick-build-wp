@@ -13,6 +13,7 @@ from app.services.deploy_lock import (
     release_host_lock,
 )
 from app.services.deploy_partial_result import DeployProgress, build_partial_result
+from app.services.deploy_stats import record_deploy_stat
 from app.services.log_publisher import publish_log
 from app.services.remote_probe import log_remote_state, probe_remote_state
 from app.tasks.celery_app import celery_app
@@ -57,6 +58,7 @@ def _fail_task(db, task_id: str, message: str) -> None:
     task.status = DeployStatus.FAILED
     task.error_message = message
     db.commit()
+    record_deploy_stat(db, task)
     publish_log(task_id, "system", f"部署失败: {message}", db)
     publish_log(task_id, "system", "[DONE]", db)
 
@@ -405,6 +407,8 @@ def run_deploy_pipeline(self, task_id: str, recovery: bool = False) -> None:
     finally:
         task_row = db.get(DeployTask, task_id)
         if task_row:
+            if task_row.status in (DeployStatus.SUCCESS, DeployStatus.FAILED):
+                record_deploy_stat(db, task_row)
             if task_row.status == DeployStatus.SUCCESS:
                 _clear_ssh_password(db, task_row)
             task_row.updated_at = datetime.utcnow()

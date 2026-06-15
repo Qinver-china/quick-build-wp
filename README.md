@@ -82,6 +82,7 @@ docker compose up --build -d
 | 服务 | 地址 |
 |------|------|
 | 前端页面 | http://localhost:5173 |
+| 部署统计页 | http://localhost:5173/stats.html |
 | 后端 API | http://localhost:8000 |
 | API 文档 | http://localhost:8000/docs |
 
@@ -145,6 +146,26 @@ docker compose down
 - 登录宝塔面板，检查站点与 SSL 状态
 - 若 SSL 申请失败，在宝塔中为站点手动申请证书即可
 - 尽快修改 SSH、宝塔、WordPress 管理员密码
+
+---
+
+## 部署统计（管理端）
+
+系统会在任务进入终态（成功 / 失败 / 用户取消）时写入 `deploy_stats` 快照表，**不参与 24 小时任务清理**，用于长期统计。
+
+### 配置
+
+1. 在后端环境变量中设置 `ADMIN_STATS_TOKEN`（与 WordPress 插件 CSF 中的「管理统计 Token」保持一致）
+2. 访问统计页并携带 Token：
+   - 独立前端：`http://localhost:5173/stats.html`（Token 保存在浏览器会话中）
+   - WordPress 后台：**Quick Build WP → 部署统计**（Token 从 CSF 配置自动注入）
+
+### 展示内容
+
+- **汇总栏**：今日 / 本周 / 本月的任务总数、成功数、失败数（已取消计入失败）
+- **明细表**：IP、网站域名、状态、失败阶段、错误摘要，支持分页与状态筛选
+
+汇总时区默认为 `Asia/Shanghai`，可通过环境变量 `STATS_TIMEZONE` 调整。
 
 ---
 
@@ -275,6 +296,8 @@ python3 -m http.server 5173
 | `DATABASE_URL` | PostgreSQL 连接串 | — |
 | `REDIS_URL` | Redis 连接串 | — |
 | `APP_SECRET` | 加密密钥（**生产必改**） | — |
+| `ADMIN_STATS_TOKEN` | 管理统计 API Token（**生产必设**） | 空（未配置时统计 API 不可用） |
+| `STATS_TIMEZONE` | 统计汇总时区 | `Asia/Shanghai` |
 | `CORS_ORIGINS` | 允许的前端来源，逗号分隔 | `http://localhost:5173` |
 | `TASK_EXPIRE_HOURS` | 任务数据保留时长（小时） | `24` |
 | `RATE_LIMIT_PER_HOUR` | 每小时部署次数限制 | `5` |

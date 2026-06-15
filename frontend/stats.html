@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quick Build WP - 部署统计</title>
+  <link rel="stylesheet" href="css/stats.css" />
+</head>
+<body>
+  <div class="page qbw-stats-app" id="qbw-stats-app">
+    <header class="header">
+      <h1>部署统计</h1>
+      <p class="subtitle">查看部署任务汇总与明细（需管理 Token）</p>
+    </header>
+
+    <section class="card" id="stats-config-section">
+      <h2 class="card-title">连接配置</h2>
+      <div class="config-grid">
+        <div class="field">
+          <label for="stats_api_base">API 地址</label>
+          <input autocomplete="off" type="text" id="stats_api_base" placeholder="http://localhost:8000" />
+        </div>
+        <div class="field">
+          <label for="stats_token">管理 Token</label>
+          <input autocomplete="new-password" type="password" id="stats_token" placeholder="ADMIN_STATS_TOKEN" />
+        </div>
+      </div>
+      <div class="config-actions">
+        <button type="button" class="btn btn-primary" id="btn-stats-connect">加载数据</button>
+      </div>
+      <p class="hint">Token 与后端环境变量 ADMIN_STATS_TOKEN 一致，仅保存在当前浏览器会话中。</p>
+    </section>
+
+    <div class="alert alert-error hidden" id="stats-error"></div>
+
+    <section class="card hidden" id="stats-content">
+      <div class="summary-grid" id="stats-summary">
+        <div class="summary-card">
+          <h3 class="summary-title">今日</h3>
+          <div class="summary-metrics">
+            <div class="metric"><span class="metric-label">总数</span><span class="metric-value" data-key="today-total">-</span></div>
+            <div class="metric metric-success"><span class="metric-label">成功</span><span class="metric-value" data-key="today-success">-</span></div>
+            <div class="metric metric-failed"><span class="metric-label">失败</span><span class="metric-value" data-key="today-failed">-</span></div>
+          </div>
+        </div>
+        <div class="summary-card">
+          <h3 class="summary-title">本周</h3>
+          <div class="summary-metrics">
+            <div class="metric"><span class="metric-label">总数</span><span class="metric-value" data-key="week-total">-</span></div>
+            <div class="metric metric-success"><span class="metric-label">成功</span><span class="metric-value" data-key="week-success">-</span></div>
+            <div class="metric metric-failed"><span class="metric-label">失败</span><span class="metric-value" data-key="week-failed">-</span></div>
+          </div>
+        </div>
+        <div class="summary-card">
+          <h3 class="summary-title">本月</h3>
+          <div class="summary-metrics">
+            <div class="metric"><span class="metric-label">总数</span><span class="metric-value" data-key="month-total">-</span></div>
+            <div class="metric metric-success"><span class="metric-label">成功</span><span class="metric-value" data-key="month-success">-</span></div>
+            <div class="metric metric-failed"><span class="metric-label">失败</span><span class="metric-value" data-key="month-failed">-</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-toolbar">
+        <h2 class="card-title table-title">明细列表</h2>
+        <div class="table-filters">
+          <label for="stats-status-filter">状态</label>
+          <select id="stats-status-filter">
+            <option value="">全部</option>
+            <option value="success">成功</option>
+            <option value="failed">失败</option>
+            <option value="cancelled">已取消</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table class="stats-table">
+          <thead>
+            <tr>
+              <th>完成时间</th>
+              <th>IP</th>
+              <th>网站</th>
+              <th>状态</th>
+              <th>失败阶段</th>
+              <th>错误摘要</th>
+            </tr>
+          </thead>
+          <tbody id="stats-table-body">
+            <tr><td colspan="6" class="empty-cell">暂无数据</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="pagination" id="stats-pagination">
+        <button type="button" class="btn btn-secondary" id="btn-stats-prev" disabled>上一页</button>
+        <span class="page-info" id="stats-page-info">第 1 / 1 页</span>
+        <button type="button" class="btn btn-secondary" id="btn-stats-next" disabled>下一页</button>
+      </div>
+    </section>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="js/stats.js"></script>
+</body>
+</html>

@@ -1,0 +1,277 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background: linear-gradient(135deg, #f0f5ff 0%, #e6f4ff 50%, #f6ffed 100%);
+  color: #1f1f1f;
+  line-height: 1.5;
+}
+
+.qbw-stats-app .page,
+.qbw-stats-app.page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 48px 24px 80px;
+}
+
+.qbw-stats-app .header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.qbw-stats-app .header h1 {
+  margin: 0 0 8px;
+  font-size: 28px;
+}
+
+.qbw-stats-app .subtitle {
+  margin: 0;
+  color: #666;
+}
+
+.qbw-stats-app .card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.qbw-stats-app .card-title {
+  margin: 0 0 20px;
+  font-size: 18px;
+}
+
+.qbw-stats-app .config-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.qbw-stats-app .field label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.qbw-stats-app .field input,
+.qbw-stats-app .field select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #d9d9d9;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.qbw-stats-app .config-actions {
+  margin-top: 16px;
+}
+
+.qbw-stats-app .hint {
+  margin: 12px 0 0;
+  font-size: 13px;
+  color: #888;
+}
+
+.qbw-stats-app .btn {
+  border: none;
+  border-radius: 8px;
+  padding: 10px 18px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.qbw-stats-app .btn-primary {
+  background: #1677ff;
+  color: #fff;
+}
+
+.qbw-stats-app .btn-secondary {
+  background: #f5f5f5;
+  color: #333;
+}
+
+.qbw-stats-app .btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.qbw-stats-app .alert {
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 24px;
+  font-size: 14px;
+}
+
+.qbw-stats-app .alert-error {
+  background: #fff2f0;
+  border: 1px solid #ffccc7;
+  color: #a8071a;
+}
+
+.qbw-stats-app .hidden {
+  display: none !important;
+}
+
+.qbw-stats-app .summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.qbw-stats-app .summary-card {
+  background: #fafafa;
+  border: 1px solid #f0f0f0;
+  border-radius: 10px;
+  padding: 16px;
+}
+
+.qbw-stats-app .summary-title {
+  margin: 0 0 12px;
+  font-size: 16px;
+}
+
+.qbw-stats-app .summary-metrics {
+  display: grid;
+  gap: 8px;
+}
+
+.qbw-stats-app .metric {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+}
+
+.qbw-stats-app .metric-value {
+  font-weight: 600;
+}
+
+.qbw-stats-app .metric-success .metric-value {
+  color: #389e0d;
+}
+
+.qbw-stats-app .metric-failed .metric-value {
+  color: #cf1322;
+}
+
+.qbw-stats-app .table-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.qbw-stats-app .table-title {
+  margin: 0;
+}
+
+.qbw-stats-app .table-filters {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.qbw-stats-app .table-filters select {
+  padding: 8px 10px;
+  border: 1px solid #d9d9d9;
+  border-radius: 8px;
+}
+
+.qbw-stats-app .table-wrap {
+  overflow-x: auto;
+}
+
+.qbw-stats-app .stats-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.qbw-stats-app .stats-table th,
+.qbw-stats-app .stats-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #f0f0f0;
+  text-align: left;
+  vertical-align: top;
+}
+
+.qbw-stats-app .stats-table th {
+  background: #fafafa;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.qbw-stats-app .empty-cell {
+  text-align: center;
+  color: #999;
+}
+
+.qbw-stats-app .site-list {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.qbw-stats-app .site-list li {
+  margin-bottom: 4px;
+}
+
+.qbw-stats-app .status-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.qbw-stats-app .status-success {
+  background: #f6ffed;
+  color: #389e0d;
+}
+
+.qbw-stats-app .status-failed {
+  background: #fff2f0;
+  color: #cf1322;
+}
+
+.qbw-stats-app .status-cancelled {
+  background: #fffbe6;
+  color: #d48806;
+}
+
+.qbw-stats-app .error-cell {
+  max-width: 280px;
+  word-break: break-word;
+  color: #666;
+}
+
+.qbw-stats-app .pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.qbw-stats-app .page-info {
+  font-size: 14px;
+  color: #666;
+}
+
+@media (max-width: 900px) {
+  .qbw-stats-app .summary-grid,
+  .qbw-stats-app .config-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .qbw-stats-app .table-toolbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
