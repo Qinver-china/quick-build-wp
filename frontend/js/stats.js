@@ -13,6 +13,8 @@
     pages: 1,
     total: 0,
     statusFilter: '',
+    sortBy: 'created_at',
+    sortOrder: 'desc',
     loading: false
   };
 
@@ -29,6 +31,30 @@
     var date = new Date(value);
     if (isNaN(date.getTime())) return esc(value);
     return esc(date.toLocaleString('zh-CN', { hour12: false }));
+  }
+
+  function formatFinishedAt(value, status) {
+    if (status === 'running' || !value) {
+      return '<span class="unfinished-label">' + esc('未完成') + '</span>';
+    }
+    return formatDate(value);
+  }
+
+  function sortIndicator(sortBy) {
+    if (state.sortBy !== sortBy) {
+      return '';
+    }
+    return state.sortOrder === 'asc' ? '↑' : '↓';
+  }
+
+  function updateSortHeaders() {
+    $root().find('.sortable-th').each(function () {
+      var $btn = $(this);
+      var sortBy = $btn.data('sort');
+      var isActive = sortBy === state.sortBy;
+      $btn.toggleClass('is-active', isActive);
+      $btn.find('.sort-indicator').text(sortIndicator(sortBy));
+    });
   }
 
   function statusLabel(status) {
@@ -143,7 +169,7 @@
   }
 
   function renderSummary(data) {
-    ['today', 'week', 'month'].forEach(function (period) {
+    ['today', 'week', 'month', 'all_time'].forEach(function (period) {
       var block = data[period] || {};
       updateSummaryMetric(period + '-total', block.total || 0);
       updateSummaryMetric(period + '-success', block.success || 0);
@@ -163,7 +189,7 @@
     items.forEach(function (item) {
       var row = '<tr>'
         + '<td>' + formatDate(item.created_at) + '</td>'
-        + '<td>' + formatDate(item.finished_at) + '</td>'
+        + '<td>' + formatFinishedAt(item.finished_at, item.status) + '</td>'
         + '<td>' + esc(item.client_ip || '-') + '</td>'
         + '<td>' + renderSites(item.sites) + '</td>'
         + '<td><span class="status-badge ' + statusClass(item.status) + '">' + esc(statusLabel(item.status)) + '</span></td>'
@@ -189,7 +215,9 @@
   function loadList() {
     var params = {
       page: state.page,
-      page_size: PAGE_SIZE
+      page_size: PAGE_SIZE,
+      sort_by: state.sortBy,
+      sort_order: state.sortOrder
     };
     if (state.statusFilter) {
       params.status = state.statusFilter;
@@ -201,6 +229,7 @@
         state.page = state.pages;
       }
       renderTable(data.items || []);
+      updateSortHeaders();
       updatePagination();
     });
   }
@@ -263,6 +292,24 @@
         loadAll();
       }
     });
+
+    $root().on('click', '.sortable-th', function () {
+      if (state.loading) return;
+      var sortBy = $(this).data('sort');
+      if (!sortBy) return;
+      if (state.sortBy === sortBy) {
+        state.sortOrder = state.sortOrder === 'asc' ? 'desc' : 'asc';
+      } else {
+        state.sortBy = sortBy;
+        state.sortOrder = sortBy === 'client_ip' ? 'asc' : 'desc';
+      }
+      state.page = 1;
+      if ($root().find('#stats-content').is(':visible')) {
+        loadList();
+      } else {
+        updateSortHeaders();
+      }
+    });
   }
 
   function initStandaloneConfig() {
@@ -279,6 +326,7 @@
       return;
     }
     bindEvents();
+    updateSortHeaders();
     initStandaloneConfig();
   });
 }(jQuery));

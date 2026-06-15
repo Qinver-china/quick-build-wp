@@ -22,6 +22,7 @@ class StatsSummaryResponse(BaseModel):
     today: StatsPeriodSummary
     week: StatsPeriodSummary
     month: StatsPeriodSummary
+    all_time: StatsPeriodSummary
     timezone: str
 
 

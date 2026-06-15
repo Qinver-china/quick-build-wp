@@ -21,6 +21,12 @@ from app.schemas.stats import (
 
 router = APIRouter(prefix="/api/admin/stats", tags=["admin-stats"])
 
+_SORT_COLUMNS = {
+    "created_at": DeployStat.created_at,
+    "finished_at": DeployStat.finished_at,
+    "client_ip": DeployStat.client_ip,
+}
+
 
 def _require_admin_token(
     authorization: str | None = Header(default=None),
@@ -58,18 +64,17 @@ def _to_utc(dt_local: datetime) -> datetime:
     return dt_local.astimezone(ZoneInfo("UTC"))
 
 
-def _build_period_summary(db: Session, since_utc: datetime) -> StatsPeriodSummary:
-    row = (
-        db.query(
-            func.count(DeployStat.id).label("total"),
-            func.sum(case((DeployStat.status == "success", 1), else_=0)).label("success"),
-            func.sum(
-                case((DeployStat.status.in_(["failed", "cancelled"]), 1), else_=0)
-            ).label("failed"),
-        )
-        .filter(DeployStat.created_at >= since_utc)
-        .one()
+def _build_period_summary(db: Session, since_utc: datetime | None = None) -> StatsPeriodSummary:
+    query = db.query(
+        func.count(DeployStat.id).label("total"),
+        func.sum(case((DeployStat.status == "success", 1), else_=0)).label("success"),
+        func.sum(
+            case((DeployStat.status.in_(["failed", "cancelled"]), 1), else_=0)
+        ).label("failed"),
     )
+    if since_utc is not None:
+        query = query.filter(DeployStat.created_at >= since_utc)
+    row = query.one()
     return StatsPeriodSummary(
         total=int(row.total or 0),
         success=int(row.success or 0),
@@ -87,8 +92,23 @@ def get_stats_summary(db: Session = Depends(get_db)):
         today=_build_period_summary(db, _to_utc(bounds["today"])),
         week=_build_period_summary(db, _to_utc(bounds["week"])),
         month=_build_period_summary(db, _to_utc(bounds["month"])),
+        all_time=_build_period_summary(db),
         timezone=settings.stats_timezone,
     )
+
+
+def _resolve_sort_order(column, sort_by: str, sort_order: str):
+    if sort_order == "asc":
+        if sort_by == "finished_at":
+            return column.asc().nullsfirst()
+        if sort_by == "client_ip":
+            return column.asc().nullsfirst()
+        return column.asc()
+    if sort_by == "finished_at":
+        return column.desc().nullslast()
+    if sort_by == "client_ip":
+        return column.desc().nullslast()
+    return column.desc()
 
 
 @router.get("", response_model=StatsListResponse, dependencies=[Depends(_require_admin_token)])
@@ -96,8 +116,13 @@ def list_stats(
     page: int = Query(default=1, ge=1),
     page_size: int = Query(default=20, ge=1, le=100),
     status: str | None = Query(default=None),
+    sort_by: str = Query(default="created_at"),
+    sort_order: str = Query(default="desc", pattern="^(asc|desc)$"),
     db: Session = Depends(get_db),
 ):
+    if sort_by not in _SORT_COLUMNS:
+        raise HTTPException(status_code=400, detail="无效的排序字段")
+
     query = db.query(DeployStat)
     if status:
         query = query.filter(DeployStat.status == status)
@@ -105,9 +130,10 @@ def list_stats(
     total = query.count()
     pages = max(1, (total + page_size - 1) // page_size)
     offset = (page - 1) * page_size
+    order_column = _SORT_COLUMNS[sort_by]
 
     rows = (
-        query.order_by(func.coalesce(DeployStat.finished_at, DeployStat.created_at).desc())
+        query.order_by(_resolve_sort_order(order_column, sort_by, sort_order))
         .offset(offset)
         .limit(page_size)
         .all()

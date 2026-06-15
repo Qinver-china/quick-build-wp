@@ -59,6 +59,14 @@
             <div class="metric metric-failed"><span class="metric-label">失败</span><span class="metric-value" data-key="month-failed">-</span></div>
           </div>
         </div>
+        <div class="summary-card">
+          <h3 class="summary-title">总计</h3>
+          <div class="summary-metrics">
+            <div class="metric"><span class="metric-label">总数</span><span class="metric-value" data-key="all_time-total">-</span></div>
+            <div class="metric metric-success"><span class="metric-label">成功</span><span class="metric-value" data-key="all_time-success">-</span></div>
+            <div class="metric metric-failed"><span class="metric-label">失败</span><span class="metric-value" data-key="all_time-failed">-</span></div>
+          </div>
+        </div>
       </div>
 
       <div class="table-toolbar">
@@ -79,9 +87,9 @@
         <table class="stats-table">
           <thead>
             <tr>
-              <th>创建时间</th>
-              <th>结束时间</th>
-              <th>IP</th>
+              <th><button type="button" class="sortable-th" data-sort="created_at">创建时间 <span class="sort-indicator"></span></button></th>
+              <th><button type="button" class="sortable-th" data-sort="finished_at">完成时间 <span class="sort-indicator"></span></button></th>
+              <th><button type="button" class="sortable-th" data-sort="client_ip">IP <span class="sort-indicator"></span></button></th>
               <th>网站</th>
               <th>状态</th>
               <th>失败阶段</th>

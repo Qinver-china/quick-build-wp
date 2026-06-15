@@ -119,7 +119,7 @@ body {
 
 .qbw-stats-app .summary-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 16px;
   margin-bottom: 28px;
 }
@@ -206,6 +206,44 @@ body {
   background: #fafafa;
   font-weight: 600;
   white-space: nowrap;
+}
+
+.qbw-stats-app .sortable-th {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-weight: 600;
+  color: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.qbw-stats-app .sortable-th:hover {
+  color: #0958d9;
+}
+
+.qbw-stats-app .sortable-th.is-active {
+  color: #0958d9;
+}
+
+.qbw-stats-app .sort-indicator {
+  display: inline-block;
+  min-width: 12px;
+  font-size: 11px;
+  line-height: 1;
+  color: #8c8c8c;
+}
+
+.qbw-stats-app .sortable-th.is-active .sort-indicator {
+  color: #0958d9;
+}
+
+.qbw-stats-app .unfinished-label {
+  color: #8c8c8c;
 }
 
 .qbw-stats-app .empty-cell {
