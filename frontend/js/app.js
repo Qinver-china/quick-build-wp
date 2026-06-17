@@ -46,15 +46,32 @@
         generic: '通用',
     };
 
-    var DOMAIN_RE = /^[a-z0-9]([a-z0-9\-]{0,61}[a-z0-9])?(\.[a-z]{2,})+$/i;
+    var DOMAIN_RE = /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,}$/i;
     var IPV4_RE = /^(?:(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(?:25[0-5]|2[0-4]\d|[01]?\d\d?)$/;
 
-    function isValidBindHost(host) {
+    function isValidSingleBindHost(host) {
         var h = (host || '').trim();
         if (!h) return false;
         if (IPV4_RE.test(h)) return true;
         if (DOMAIN_RE.test(h.toLowerCase())) return true;
         return false;
+    }
+
+    function isValidBindHost(host) {
+        var h = (host || '').trim();
+        if (!h) return false;
+        if (h.indexOf('\n') < 0 && h.indexOf('\r') < 0) {
+            return isValidSingleBindHost(h);
+        }
+        var lines = h.split(/\r\n|\r|\n/);
+        var hasLine = false;
+        for (var i = 0; i < lines.length; i++) {
+            var line = lines[i].trim();
+            if (!line) continue;
+            if (!isValidSingleBindHost(line)) return false;
+            hasLine = true;
+        }
+        return hasLine;
     }
 
     var BLOCKED_SSH_HOSTNAMES = {
@@ -65,7 +82,6 @@
     };
 
     function isBlockedSshHost(host) {
-
         var raw = (host || '').trim();
         if (!raw) return false;
         var h = raw;
