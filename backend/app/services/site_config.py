@@ -13,8 +13,10 @@ from sqlalchemy.orm import Session
 from app.core.sql_safety import sanitize_db_prefix, sanitize_sql_identifier, validate_email
 from app.models.deploy import DeployTask
 
+# 与前端 app.js DOMAIN_RE 保持一致：各标签可含数字，TLD 至少 2 个字母
 DOMAIN_RE = re.compile(
-    r"^[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z]{2,})+$"
+    r"^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,}$",
+    re.IGNORECASE,
 )
 
 
