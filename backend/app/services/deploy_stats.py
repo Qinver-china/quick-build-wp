@@ -120,3 +120,15 @@ def record_deploy_stat(db: Session, task: DeployTask, *, status: str | None = No
     )
     db.add(stat)
     db.commit()
+
+
+def ensure_terminal_deploy_stat(db: Session, task: DeployTask) -> None:
+    """终态任务清理前补写 success/failed 统计，不覆盖已有终态快照。"""
+    if task.status not in (DeployStatus.SUCCESS, DeployStatus.FAILED):
+        return
+
+    existing = db.query(DeployStat).filter(DeployStat.task_id == task.id).first()
+    if existing and existing.status not in (DeployStatStatus.RUNNING.value,):
+        return
+
+    record_deploy_stat(db, task)

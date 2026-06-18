@@ -19,7 +19,7 @@ from app.schemas.deploy import (
 )
 from app.services.deploy_cancel import clear_deploy_cancelled, purge_deploy_task
 from app.services.deploy_lock import clear_deploy_lock, release_host_lock, release_stale_host_lock
-from app.services.deploy_stats import record_deploy_stat, restart_deploy_stat, start_deploy_stat
+from app.services.deploy_stats import ensure_terminal_deploy_stat, record_deploy_stat, restart_deploy_stat, start_deploy_stat
 from app.services.log_publisher import publish_log
 from app.services.preflight import run_preflight_with_timeout
 from app.tasks.deploy_pipeline import run_deploy_pipeline
@@ -168,6 +168,11 @@ def cancel_deploy(token: str, db: Session = Depends(get_db)):
     task = db.query(DeployTask).filter(DeployTask.token == token).first()
     if not task:
         return DeployCancelResponse(ok=True, message="任务不存在或已删除")
+
+    if task.status in (DeployStatus.SUCCESS, DeployStatus.FAILED):
+        ensure_terminal_deploy_stat(db, task)
+        purge_deploy_task(db, task)
+        return DeployCancelResponse(ok=True, message="任务记录已清除")
 
     record_deploy_stat(db, task, status="cancelled")
     purge_deploy_task(db, task)
